@@ -8,10 +8,11 @@ export const authGuard: CanActivateFn = (route, state) => {
   const platformId = inject(PLATFORM_ID);
   const router = inject(Router);
   const toastr = inject(ToastrService);
+  const authService = inject(AuthService);
   if (isPlatformBrowser(platformId)) {
     const token = localStorage.getItem('eCommerceToken') || sessionStorage.getItem('eCommerceToken');
     if (token) {
-      const authService = inject(AuthService);
+
       authService.isLoggedInUser.set(!!token);
       return true;
     }

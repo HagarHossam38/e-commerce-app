@@ -1,15 +1,26 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, signal, WritableSignal } from '@angular/core';
+import { inject, Injectable, PLATFORM_ID, signal, WritableSignal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly httpClient = inject(HttpClient);
+  private readonly platformId = inject(PLATFORM_ID);
   isLoggedInUser: WritableSignal<boolean> = signal(false);
-  
+  setLoggedInUser(value: boolean) {
+    localStorage.setItem('eCommerceToken', JSON.stringify(value));
+    this.isLoggedInUser.set(value);
+  }
+
+  checkLoggedIn(): boolean {
+    const stored = localStorage.getItem('eCommerceToken');
+    if (stored) this.isLoggedInUser.set(JSON.parse(stored));
+    return this.isLoggedInUser();
+  }
   singUp(data: any): Observable<any> {
     return this.httpClient.post(`${environment.baseUrl}/api/v1/auth/signup`, data)
   }

@@ -2,6 +2,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { inject, PLATFORM_ID } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { AuthService } from '../../services/auth/auth.service';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const platformId = inject(PLATFORM_ID);
@@ -10,6 +11,8 @@ export const authGuard: CanActivateFn = (route, state) => {
   if (isPlatformBrowser(platformId)) {
     const token = localStorage.getItem('eCommerceToken') || sessionStorage.getItem('eCommerceToken');
     if (token) {
+      const authService = inject(AuthService);
+      authService.isLoggedInUser.set(!!token);
       return true;
     }
     else {
@@ -18,6 +21,6 @@ export const authGuard: CanActivateFn = (route, state) => {
     }
   }
   else {
-    return false;
+    return true;
   }
 };

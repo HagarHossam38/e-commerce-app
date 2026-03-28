@@ -1,20 +1,20 @@
 import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const serverRoutes: ServerRoute[] = [
-  { path: 'product-details/:id', renderMode: RenderMode.Server },
-  { path: 'category-filter/:id', renderMode: RenderMode.Server },
-  { path: 'brands-filter/:id', renderMode: RenderMode.Server },
+  { path: 'product-details/:id', renderMode: RenderMode.Client },
+  { path: 'category-filter/:id', renderMode: RenderMode.Client },
+  { path: 'brands-filter/:id', renderMode: RenderMode.Client },
   {
     path: 'allorders',
-    renderMode: RenderMode.Server   // SSR
+    renderMode: RenderMode.Client   // SSR
   },
   {
     path: 'cart',
-    renderMode: RenderMode.Server
+    renderMode: RenderMode.Client
   },
   {
     path: 'checkout',
-    renderMode: RenderMode.Server
+    renderMode: RenderMode.Client
   },
   {
     path: 'wishlist',

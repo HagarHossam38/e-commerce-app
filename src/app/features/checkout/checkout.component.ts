@@ -16,6 +16,7 @@ export class CheckoutComponent implements OnInit {
 
   private readonly fb = inject(FormBuilder);
   checkoutForm!: FormGroup;
+
   ngOnInit(): void {
     this.initCheckoutForm();
     this.getLoggedUserCart();
@@ -50,6 +51,7 @@ export class CheckoutComponent implements OnInit {
     this.ordersService.checkoutSession(this.cartId(), payload).subscribe({
       next: (res) => {
         if (res.status === 'success') {
+          this.cartService.numberOfCartItems.set(0);
           window.open(res.session.url, '_self');//_self to open in the same tab
         }
       },
@@ -74,7 +76,10 @@ export class CheckoutComponent implements OnInit {
     this.ordersService.createCashOrder(this.cartId(), payload).subscribe({
       next: (res) => {
         console.log(res);
-        if (res.status === 'success') { this.router.navigate(['/allorders']); }
+        if (res.status === 'success') {
+          this.cartService.numberOfCartItems.set(0);
+          this.router.navigate(['/allorders']);
+        }
       },
       error: (err) => {
         console.log(err);
@@ -82,6 +87,7 @@ export class CheckoutComponent implements OnInit {
     })
 
   }
+
   //HELPER Mehtods
   payWithVisaFlag: WritableSignal<boolean> = signal(false);
   private readonly cartService = inject(CartService);
@@ -99,6 +105,7 @@ export class CheckoutComponent implements OnInit {
     });
 
   }
+
   totalPrice = computed(() => this.cartDetails()?.data?.totalCartPrice ?? 0);
   hasFreeShipping = computed(() => this.totalPrice() >= 500);
   shippingCost: WritableSignal<number> = signal(50);

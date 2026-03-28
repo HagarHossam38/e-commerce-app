@@ -18,7 +18,7 @@ export const serverRoutes: ServerRoute[] = [
   },
   {
     path: 'wishlist',
-    renderMode: RenderMode.Server
+    renderMode: RenderMode.Client
   },
 
   {

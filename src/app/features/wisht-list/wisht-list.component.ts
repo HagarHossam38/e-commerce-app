@@ -63,17 +63,20 @@ export class WishtListComponent implements OnInit {
         console.log(res);
         this.getLoggedUsertWishlist();
         console.log(this.wishlistService.numberOfWishListItems());
+        this.wishlistService.numberOfWishListItems.set(res.data.length);
       },
       error: (err) => {
         console.log(err);
       }
     });
   }
+
   addToCart(productId: any) {
     this.cartService.addProductToCart(productId).subscribe({
       next: (res) => {
         console.log(res);
         this.getLoggedUserCart();
+        this.cartService.numberOfCartItems.set(res.numOfCartItems);
       },
       error: (err) => {
         console.log(err);

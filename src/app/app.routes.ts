@@ -17,6 +17,7 @@ import { ShopComponent } from './features/shop/shop.component';
 import { HelpQuestionsComponent } from './features/help-questions/help-questions.component';
 import { BrandsFilterComponent } from './features/brands-filter/brands-filter.component';
 import { CategoryFilterComponent } from './features/category-filter/category-filter.component';
+import { ProfileComponent } from './features/profile/profile.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -32,6 +33,7 @@ export const routes: Routes = [
     { path: 'categories', component: CategoriesComponent, title: "Fresh Cart" },
     { path: 'support', component: SupportComponent, title: "Fresh Cart" },
     { path: 'help', component: HelpQuestionsComponent, title: "Fresh Cart" },
+    { path: 'profile', component: ProfileComponent, title: "Fresh Cart" },
     { path: 'wishlist', component: WishtListComponent, title: "Fresh Cart", canActivate: [authGuard] },
     { path: 'checkout', component: CheckoutComponent, title: "Fresh Cart", canActivate: [authGuard] },
     { path: 'cart', component: CartComponent, title: "Fresh Cart", canActivate: [authGuard] },

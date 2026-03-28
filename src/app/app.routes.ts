@@ -7,7 +7,7 @@ import { SupportComponent } from './features/support/support.component';
 import { WishtListComponent } from './features/wisht-list/wisht-list.component';
 import { NotFoundComponent } from './features/not-found/not-found.component';
 import { CartComponent } from './features/cart/cart.component';
-import { ProductDetailsComponent } from './shared/product-details/product-details.component';
+import { ProductDetailsComponent } from './shared/components/product-details/product-details.component';
 import { LoginComponent } from './core/auth/login/login.component';
 import { RegisterComponent } from './core/auth/register/register.component';
 import { ForgotPasswordComponent } from './features/forgot-password/forgot-password.component';

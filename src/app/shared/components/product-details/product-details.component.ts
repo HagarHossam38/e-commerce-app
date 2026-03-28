@@ -1,14 +1,14 @@
 import { Component, computed, inject, input, InputSignal, OnInit, Signal, signal, WritableSignal, CUSTOM_ELEMENTS_SCHEMA, } from '@angular/core';
-import { IProduct } from '../../core/models/IProduct/iproduct.interface';
+import { IProduct } from '../../../core/models/IProduct/iproduct.interface';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { ProductsService } from '../../core/services/products/products.service';
+import { ProductsService } from '../../../core/services/products/products.service';
 import { CurrencyPipe } from '@angular/common';
-import { CartService } from '../../core/services/cart/cart.service';
+import { CartService } from '../../../core/services/cart/cart.service';
 import { ToastrService } from 'ngx-toastr';
 
 import { register } from 'swiper/element/bundle';
-import { WishlistService } from '../../core/services/wishlist/wishlist.service';
-import { AuthService } from '../../core/services/auth/auth.service';
+import { WishlistService } from '../../../core/services/wishlist/wishlist.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
 @Component({
   selector: 'app-product-details',
   imports: [RouterLink, CurrencyPipe],

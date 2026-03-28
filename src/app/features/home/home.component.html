@@ -255,11 +255,26 @@
         <!--Products
         Loop on product card
         -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        @if (productList().length>0) { <div
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             @for (prod of productList().slice(0,10); track prod._id) {
             <app-product-card [product]="prod" [wishListDetails]="wishListDetails()"></app-product-card>
             }
         </div>
+
+        }
+        @else{
+        <div class="text-center py-20">
+            <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-5">
+                <i class="fa-solid fa-box-open text-3xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">No Products Found</h3>
+            <p class="text-gray-500 mb-6">No products match your current filters.</p><a
+                class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary-600 text-white font-semibold hover:bg-primary-700 transition-colors"
+                routerLink="/shop">View All Products</a>
+        </div>
+        }
+
     </section>
 
     <!--========================================================================-->

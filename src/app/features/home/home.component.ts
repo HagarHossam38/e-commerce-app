@@ -1,14 +1,15 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit, signal, WritableSignal } from '@angular/core';
-import { ProductCardComponent } from "../../shared/product-card/product-card.component";
+import { ProductCardComponent } from "../../shared/components/product-card/product-card.component";
 import { ProductsService } from '../../core/services/products/products.service';
 import { IProduct } from '../../core/models/IProduct/iproduct.interface';
-import { CategoryCardComponent } from "../../shared/category-card/category-card.component";
+
 import { CategoryService } from '../../core/services/category/category.service';
 import { ICategory } from '../../core/models/ICategory/icategory.interface';
 import { RouterLink } from "@angular/router";
 import { register } from 'swiper/element/bundle';
 import { WishlistService } from '../../core/services/wishlist/wishlist.service';
 import { AuthService } from '../../core/services/auth/auth.service';
+import { CategoryCardComponent } from '../../shared/components/category-card/category-card.component';
 @Component({
   selector: 'app-home',
   imports: [ProductCardComponent, CategoryCardComponent, RouterLink],

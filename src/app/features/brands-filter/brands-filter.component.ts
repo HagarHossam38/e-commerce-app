@@ -5,7 +5,7 @@ import { AuthService } from '../../core/services/auth/auth.service';
 import { IProduct } from '../../core/models/IProduct/iproduct.interface';
 import { WishlistService } from '../../core/services/wishlist/wishlist.service';
 import { NgxPaginationModule } from 'ngx-pagination';
-import { ProductCardComponent } from "../../shared/product-card/product-card.component"; // <-- import the module
+import { ProductCardComponent } from "../../shared/components/product-card/product-card.component"; // <-- import the module
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { IBrand } from '../../core/models/IBrand/ibrand.interface';
 

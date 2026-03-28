@@ -4,7 +4,7 @@ import { WishlistService } from '../../core/services/wishlist/wishlist.service';
 import { IProduct } from '../../core/models/IProduct/iproduct.interface';
 import { ProductsService } from '../../core/services/products/products.service';
 import { AuthService } from '../../core/services/auth/auth.service';
-import { ProductCardComponent } from "../../shared/product-card/product-card.component";
+import { ProductCardComponent } from "../../shared/components/product-card/product-card.component";
 import { NgxPaginationModule } from 'ngx-pagination'; // <-- import the module
 
 @Component({

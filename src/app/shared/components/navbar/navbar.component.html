@@ -70,7 +70,7 @@
             <div class="flex items-center gap-1 lg:gap-2">
                 <!-- Support Section -->
                 <div routerLink="/support"
-                    class="hidden lg:flex items-center gap-2 pr-3 mr-2 border-r border-gray-200 hover:opacity-80 transition-opacity">
+                    class="hidden lg:flex items-center gap-2 pr-3 mr-2 border-r border-gray-200 hover:opacity-80 transition-opacity cursor-pointer">
                     <div
                         class="size-10 rounded-full bg-primary-50 flex items-center justify-center text-primary-600 cursor-pointer">
                         <i class="fa-solid fa-headset"></i>
@@ -175,10 +175,11 @@
                     (click)="logOut()">Sign Out</a>
                 }
                 @else {
-                <a class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary-600 text-white
+                <a (click)="mobileMenuOpen.set(false)" class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary-600 text-white
                 font-semibold hover:bg-primary-700 transition-colors" routerLink="/login">Sign In</a>
 
-                <a class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-primary-600 text-primary-600 font-semibold hover:bg-primary-50 transition-colors"
+                <a (click)="mobileMenuOpen.set(false)"
+                    class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-primary-600 text-primary-600 font-semibold hover:bg-primary-50 transition-colors"
                     routerLink="/register">Sign Up</a>
                 }
             </div>

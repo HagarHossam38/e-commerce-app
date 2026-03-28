@@ -1,10 +1,10 @@
-import { CartService } from './../../core/services/cart/cart.service';
+import { CartService } from '../../../core/services/cart/cart.service';
 import { Component, inject, input, Input, InputSignal, signal, WritableSignal } from '@angular/core';
-import { IProduct } from '../../core/models/IProduct/iproduct.interface';
+import { IProduct } from '../../../core/models/IProduct/iproduct.interface';
 import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from "@angular/router";
 import { ToastrService } from 'ngx-toastr';
-import { WishlistService } from '../../core/services/wishlist/wishlist.service';
+import { WishlistService } from '../../../core/services/wishlist/wishlist.service';
 
 @Component({
   selector: 'app-product-card',

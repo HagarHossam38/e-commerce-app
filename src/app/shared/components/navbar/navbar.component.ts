@@ -1,12 +1,12 @@
 import { Component, HostListener, inject, OnInit, PLATFORM_ID, signal, WritableSignal, computed, Signal } from '@angular/core';
-import { FlowbiteService } from '../../core/services/flowbite/flowbite.service';
+import { FlowbiteService } from '../../../core/services/flowbite/flowbite.service';
 import { initFlowbite } from 'flowbite';
 import { Router, RouterLink, RouterLinkActive } from "@angular/router";
 import { FormsModule } from '@angular/forms';
 import { isPlatformBrowser } from '@angular/common';
-import { CartService } from '../../core/services/cart/cart.service';
-import { WishlistService } from '../../core/services/wishlist/wishlist.service';
-import { AuthService } from '../../core/services/auth/auth.service';
+import { CartService } from '../../../core/services/cart/cart.service';
+import { WishlistService } from '../../../core/services/wishlist/wishlist.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -65,6 +65,7 @@ export class NavbarComponent implements OnInit {
     this.authService.isLoggedInUser.set(false);
     this.cartService.numberOfCartItems.set(0);
     this.wishListService.numberOfWishListItems.set(0);
+    this.mobileMenuOpen.set(false);
   }
 
   private readonly cartService = inject(CartService);

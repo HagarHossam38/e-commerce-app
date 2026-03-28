@@ -1,9 +1,11 @@
 import { Component, Input, input, InputSignal } from '@angular/core';
-import { ICategory } from '../../core/models/ICategory/icategory.interface';
+
+import { RouterLink } from "@angular/router";
+import { ICategory } from '../../../core/models/ICategory/icategory.interface';
 
 @Component({
   selector: 'app-category-card',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './category-card.component.html',
   styleUrl: './category-card.component.css',
 })

@@ -41,6 +41,9 @@ export class WishtListComponent implements OnInit {
     this.cartService.getLoggedUserCart().subscribe({
       next: (res) => {
         this.cartDetails.set(res);
+        this.cartService.numberOfCartItems.set(res.numOfCartItems);
+        console.log(this.cartService.numberOfCartItems());
+
       },
       error: (err) => {
         console.log(err);
@@ -76,7 +79,6 @@ export class WishtListComponent implements OnInit {
       next: (res) => {
         console.log(res);
         this.getLoggedUserCart();
-        this.cartService.numberOfCartItems.set(res.numOfCartItems);
       },
       error: (err) => {
         console.log(err);

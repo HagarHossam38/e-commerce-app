@@ -1,3 +1,38 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "flowbite/src/themes/default";
+@plugin "flowbite/plugin";
+@source "../node_modules/flowbite";
+
+html,
+body {
+    font-family: "Exo", sans-serif;
+    color: #364153;
+    background-color: white;
+    font-weight: 500;
+}
+
+button,
+a {
+    cursor: pointer;
+}
+
+button:disabled,
+a:disabled {
+    cursor: not-allowed;
+}
+
+@theme {
+    --color-primary-50: #f0fdf4;
+    --color-primary-100: #dcfce7;
+    --color-primary-200: #bbf7d0;
+    --color-primary-300: #86efac;
+    --color-primary-400: #4ade80;
+    --color-primary-500: #22c55e;
+    --color-primary-600: #16a34a;
+    --color-primary-700: #15803d;
+    --color-primary-800: #14532d;
+    --color-primary-900: #134e28;
+}

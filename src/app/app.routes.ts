@@ -34,9 +34,9 @@ export const routes: Routes = [
     { path: 'support', component: SupportComponent, title: "Fresh Cart" },
     { path: 'help', component: HelpQuestionsComponent, title: "Fresh Cart" },
     { path: 'profile', component: ProfileComponent, title: "Fresh Cart" },
-    { path: 'wishlist', component: WishtListComponent, title: "Fresh Cart", canActivate: [authGuard] },
+    { path: 'wishlist', component: WishtListComponent, title: "Fresh Cart" },
     { path: 'checkout', component: CheckoutComponent, title: "Fresh Cart", canActivate: [authGuard] },
-    { path: 'cart', component: CartComponent, title: "Fresh Cart", canActivate: [authGuard] },
+    { path: 'cart', component: CartComponent, title: "Fresh Cart" },
     { path: 'allorders', component: AllOrdersComponent, title: "Fresh Cart", canActivate: [authGuard] },
     { path: '**', component: NotFoundComponent, title: "Fresh Cart| Not Found" },
 ];

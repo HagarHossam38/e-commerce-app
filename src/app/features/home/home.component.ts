@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, OnDestroy, OnInit, PLATFORM_ID, signal, WritableSignal } from '@angular/core';
 import { ProductCardComponent } from "../../shared/components/product-card/product-card.component";
 import { ProductsService } from '../../core/services/products/products.service';
 import { IProduct } from '../../core/models/IProduct/iproduct.interface';
@@ -10,6 +10,8 @@ import { register } from 'swiper/element/bundle';
 import { WishlistService } from '../../core/services/wishlist/wishlist.service';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { CategoryCardComponent } from '../../shared/components/category-card/category-card.component';
+import { Subscription } from 'rxjs';
+import { isPlatformBrowser } from '@angular/common';
 @Component({
   selector: 'app-home',
   imports: [ProductCardComponent, CategoryCardComponent, RouterLink],
@@ -17,27 +19,38 @@ import { CategoryCardComponent } from '../../shared/components/category-card/cat
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   private readonly productsService = inject(ProductsService);
   private readonly categoryService = inject(CategoryService);
   private readonly authService = inject(AuthService);
+  private readonly platfromId = inject(PLATFORM_ID);
   productList: WritableSignal<IProduct[]> = signal([]);
   categoriesList: WritableSignal<ICategory[]> = signal([]);
+
+  //Subscrition
+  private productsSub: Subscription | null = null;
+  private categoriesSub: Subscription | null = null;
+  private wishlistSub: Subscription | null = null;
   ngOnInit(): void {
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
     //Add 'implements OnInit' to the class.
     this.getAllProducts();
     this.getAllCategories();
-    if (this.authService.isLoggedInUser() === true) {
+
+    if (this.authService.isLoggedInUser()) {
       this.getLoggedUserWishList();
     }
+    else {
+      this.getGuestWishlist();
+    }
+
     // register Swiper custom elements
     register();
   }
 
 
   getAllProducts() {
-    this.productsService.getAllProducts().subscribe({
+    this.productsSub = this.productsService.getAllProducts().subscribe({
       next: (res) => {
         this.productList.set(res.data);
         console.log(this.productList());
@@ -49,7 +62,7 @@ export class HomeComponent implements OnInit {
     })
   }
   getAllCategories() {
-    this.categoryService.getAllCategories().subscribe({
+    this.categoriesSub = this.categoryService.getAllCategories().subscribe({
       next: (res) => {
         this.categoriesList.set(res.data);
         console.log(this.categoriesList());
@@ -64,11 +77,9 @@ export class HomeComponent implements OnInit {
   wishListDetails: WritableSignal<IProduct[]> = signal([]);
 
   getLoggedUserWishList() {
-    this.wishlistService.getLoggedUserWishlist().subscribe({
-
+    this.wishlistSub = this.wishlistService.getLoggedUserWishlist().subscribe({
       next: (res) => {
         this.wishListDetails.set(res.data);
-        console.log('wishlist', res.data);
       },
       error: (err) => {
         console.log(err);
@@ -77,8 +88,24 @@ export class HomeComponent implements OnInit {
   }
 
 
+  getGuestWishlist() {
+    if (isPlatformBrowser(this.platfromId)) {
+      let guestWishlist = JSON.parse(localStorage.getItem('guestWishlist') || '[]');
+      this.wishListDetails.set(guestWishlist);
+      this.wishlistService.numberOfWishListItems.set(guestWishlist.length);
+    }
+  }
+  //===================
 
 
-  //Slider
+
+
+
+
+  ngOnDestroy() {
+    this.productsSub?.unsubscribe();
+    this.categoriesSub?.unsubscribe();
+    this.wishlistSub?.unsubscribe();
+  }
 
 }

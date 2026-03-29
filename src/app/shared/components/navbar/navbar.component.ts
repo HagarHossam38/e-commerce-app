@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, OnInit, PLATFORM_ID, signal, WritableSignal, computed, Signal } from '@angular/core';
+import { Component, HostListener, inject, OnInit, PLATFORM_ID, signal, WritableSignal, computed, Signal, OnDestroy } from '@angular/core';
 import { FlowbiteService } from '../../../core/services/flowbite/flowbite.service';
 import { initFlowbite } from 'flowbite';
 import { Router, RouterLink, RouterLinkActive } from "@angular/router";
@@ -7,6 +7,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { CartService } from '../../../core/services/cart/cart.service';
 import { WishlistService } from '../../../core/services/wishlist/wishlist.service';
 import { AuthService } from '../../../core/services/auth/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -14,7 +15,7 @@ import { AuthService } from '../../../core/services/auth/auth.service';
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
 
   //Flags
   isLoggedInUser: Signal<boolean> = computed(() => this.authService.isLoggedInUser());// if user logged in
@@ -38,7 +39,8 @@ export class NavbarComponent implements OnInit {
       }
       else {
         this.authService.isLoggedInUser.set(false);
-
+        this.getGuestCart();
+        this.getGuestWishlist();
       }
     }
   }
@@ -72,9 +74,10 @@ export class NavbarComponent implements OnInit {
   private readonly wishListService = inject(WishlistService);
   cartCount: Signal<number> = computed(() => this.cartService.numberOfCartItems());
   wishListCount: Signal<number> = computed(() => this.wishListService.numberOfWishListItems());
-
+  cartSub: Subscription | null = null;
+  wishlitstSub: Subscription | null = null;
   getLoggedUserCart() {
-    this.cartService.getLoggedUserCart().subscribe({
+    this.cartSub = this.cartService.getLoggedUserCart().subscribe({
       next: (res) => {
         console.log(res);
         this.cartService.numberOfCartItems.set(res.numOfCartItems);
@@ -86,7 +89,7 @@ export class NavbarComponent implements OnInit {
   }
 
   getLoggedUsertWishlist() {
-    this.wishListService.getLoggedUserWishlist().subscribe({
+    this.wishlitstSub = this.wishListService.getLoggedUserWishlist().subscribe({
       next: (res) => {
         this.wishListService.numberOfWishListItems.set(res.data.length);
       },
@@ -97,4 +100,19 @@ export class NavbarComponent implements OnInit {
     });
   }
 
+  getGuestWishlist() {
+
+    let guestWishlist = JSON.parse(localStorage.getItem('guestWishlist') || '[]');
+    this.wishListService.numberOfWishListItems.set(guestWishlist.length);
+  }
+
+  getGuestCart() {
+    let guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+    this.cartService.numberOfCartItems.set(guestCart.length);
+  }
+
+  ngOnDestroy(): void {
+    this.cartSub?.unsubscribe();
+    this.wishlitstSub?.unsubscribe();
+  }
 }

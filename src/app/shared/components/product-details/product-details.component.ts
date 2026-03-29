@@ -1,14 +1,16 @@
-import { Component, computed, inject, input, InputSignal, OnInit, Signal, signal, WritableSignal, CUSTOM_ELEMENTS_SCHEMA, } from '@angular/core';
+import { Component, computed, inject, input, InputSignal, OnInit, Signal, signal, WritableSignal, CUSTOM_ELEMENTS_SCHEMA, PLATFORM_ID, OnDestroy, } from '@angular/core';
 import { IProduct } from '../../../core/models/IProduct/iproduct.interface';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ProductsService } from '../../../core/services/products/products.service';
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, isPlatformBrowser } from '@angular/common';
 import { CartService } from '../../../core/services/cart/cart.service';
 import { ToastrService } from 'ngx-toastr';
 
 import { register } from 'swiper/element/bundle';
 import { WishlistService } from '../../../core/services/wishlist/wishlist.service';
 import { AuthService } from '../../../core/services/auth/auth.service';
+import { IGuestCartItem } from '../../../core/models/IGuestCartItem/iguest-cart-item.interface';
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-product-details',
   imports: [RouterLink, CurrencyPipe],
@@ -16,9 +18,18 @@ import { AuthService } from '../../../core/services/auth/auth.service';
   styleUrl: './product-details.component.css',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class ProductDetailsComponent implements OnInit {
+export class ProductDetailsComponent implements OnInit, OnDestroy {
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly productsService = inject(ProductsService);
+  private readonly authService = inject(AuthService);
+  private readonly wishlistService = inject(WishlistService);
+  private readonly cartService = inject(CartService);
+  private readonly toastrService = inject(ToastrService);
+
+  private addToCartSub: Subscription | null = null;
+  private addToWishlistSub: Subscription | null = null;
+  private deleteFromWishlistSub: Subscription | null = null
+
   productId: WritableSignal<string> = signal('');
   prodData: WritableSignal<IProduct> = signal({} as IProduct);
 
@@ -52,7 +63,7 @@ export class ProductDetailsComponent implements OnInit {
       }
     })
   }
-  private readonly authService = inject(AuthService);
+
 
   getSpecificProduct() {
     this.productsService.getSpecificProduct(this.productId()).subscribe({
@@ -62,34 +73,8 @@ export class ProductDetailsComponent implements OnInit {
         if (this.authService.isLoggedInUser() === true) {
           this.getLoggedUserWishList();
         }
-      },
-      error: (err) => {
-        console.log(err);
-      }
-    });
-  }
-
-  private readonly cartService = inject(CartService);
-  private readonly toastrService = inject(ToastrService);
-
-
-  addToCart() {
-    this.cartService.addProductToCart(this.productId()).subscribe({
-      next: (res) => {
-        if (res.status === 'success') {
-          console.log(res);
-          if (this.quantity() > 1) {
-            this.updateProductQuantity();
-            this.toastrService.success(`${this.quantity()} of ${this.prodData().title} Added`, "Product Added")
-          }
-          else {
-            this.toastrService.success(
-              `${this.prodData().title} has been added to your cart`,
-              "Product Added"
-            );
-          }
-          //To show cart items count in nav bar
-          this.cartService.numberOfCartItems.set(res.numOfCartItems);
+        else {
+          this.getGuestWishlist();
         }
       },
       error: (err) => {
@@ -99,6 +84,56 @@ export class ProductDetailsComponent implements OnInit {
   }
 
 
+  addToCart() {
+    if (this.authService.isLoggedInUser()) {
+      this.addToCartSub = this.cartService.addProductToCart(this.productId()).subscribe({
+        next: (res) => {
+          if (res.status === 'success') {
+            console.log(res);
+            if (this.quantity() > 1) {
+              this.updateProductQuantity();
+              this.toastrService.success(`${this.quantity()} of ${this.prodData().title} Added`, "Product Added")
+            }
+            else {
+              this.toastrService.success(
+                `${this.prodData().title} has been added to your cart`,
+                "Product Added"
+              );
+            }
+            //To show cart items count in nav bar
+            this.cartService.numberOfCartItems.set(res.numOfCartItems);
+          }
+        },
+        error: (err) => {
+          console.log(err);
+        }
+      });
+    }
+    else { this.addToGuestCart() }
+  }
+
+  addToGuestCart() {
+    let guestCart: IGuestCartItem[] = JSON.parse(localStorage.getItem('guestCart') || '[]');
+
+    let existingProduct = guestCart.find(
+      item => item.product.id === this.prodData().id
+    );
+    if (existingProduct) { //refresnce not a new copy
+      existingProduct.count++;
+    } else {
+      guestCart.push({
+        product: this.prodData(),
+        count: this.quantity()
+      });
+    }
+    localStorage.setItem('guestCart', JSON.stringify(guestCart));
+    this.cartService.numberOfCartItems.set(guestCart.length);
+    this.toastrService.success(
+      `${this.prodData().title} saved locally`,
+      "Saved"
+    );
+  }
+  //===========
   updateProductQuantity() {
     this.cartService.updateCartProductQuantity(this.productId(), this.quantity()).subscribe({
       next: (res) => {
@@ -111,47 +146,94 @@ export class ProductDetailsComponent implements OnInit {
   }
 
 
-  private readonly wishlistService = inject(WishlistService);
+
   addToWishlist() {
-    this.wishlistService.addProductToWishlist(this.productId()).subscribe({
-      next: (res) => {
-        console.log(res);
-        this.inWishListFlag.set(true);
-        this.toastrService.success(
-          `${this.prodData().title} has been added to your wish list`,
-          "Product Added"
-        );
-        this.wishlistService.numberOfWishListItems.set(res.data.length);
-      },
-      error: (err) => {
-        console.log(err);
-        this.toastrService.error(
-          `Failed to Add ${this.prodData().title} to your wish list`,
-          "Error"
-        );
-      }
-    });
+    if (this.authService.isLoggedInUser()) {
+      this.addToWishlistSub = this.wishlistService.addProductToWishlist(this.productId()).subscribe({
+        next: (res) => {
+          console.log(res);
+          this.inWishListFlag.set(true);
+          this.toastrService.success(
+            `${this.prodData().title} has been added to your wish list`,
+            "Product Added"
+          );
+          this.wishlistService.numberOfWishListItems.set(res.data.length);
+        },
+        error: (err) => {
+          console.log(err);
+          this.toastrService.error(
+            `Failed to Add ${this.prodData().title} to your wish list`,
+            "Error"
+          );
+        }
+      });
+    }
+    else {
+      this.addToGuestWishlist();
+    }
+  }
+
+
+  addToGuestWishlist() {
+    let guestWishlist: IProduct[] =
+      JSON.parse(localStorage.getItem('guestWishlist') || '[]');
+
+    let exists = guestWishlist.some(
+      item => item.id === this.prodData().id
+    );
+
+    if (!exists) {
+      guestWishlist.push(this.prodData());
+
+      localStorage.setItem('guestWishlist', JSON.stringify(guestWishlist));
+
+      this.toastrService.success(
+        `${this.prodData().title} saved locally ❤️`,
+        "Saved"
+      );
+
+      this.inWishListFlag.set(true);
+      this.wishlistService.numberOfWishListItems.set(guestWishlist.length);
+    } else {
+      this.toastrService.info(
+        `${this.prodData().title} already in wishlist 😏`,
+        "Already Added"
+      );
+    }
   }
 
   deleteItemFromWishlist() {
-    this.wishlistService.removeProductFromWishlist(this.productId()).subscribe({
-      next: (res) => {
-        console.log(res);
-        this.inWishListFlag.set(false);
-        this.wishlistService.numberOfWishListItems.set(res.data.length);
-      },
-      error: (err) => {
-        console.log(err);
-      }
-    });
+    if (this.authService.isLoggedInUser()) {
+      this.deleteFromWishlistSub = this.wishlistService.removeProductFromWishlist(this.productId()).subscribe({
+        next: (res) => {
+          console.log(res);
+          this.inWishListFlag.set(false);
+          this.wishlistService.numberOfWishListItems.set(res.data.length);
+        },
+        error: (err) => {
+          console.log(err);
+        }
+      });
+    }
+    else {
+      let guestWishlist = JSON.parse(localStorage.getItem('guestWishlist') || '[]');
+
+      guestWishlist = guestWishlist.filter(
+        (item: IProduct) => item.id !== this.prodData().id
+      );
+
+      localStorage.setItem('guestWishlist', JSON.stringify(guestWishlist));
+
+      this.inWishListFlag.set(false);
+      this.wishlistService.numberOfWishListItems.set(guestWishlist.length);
+    }
   }
 
 
   wishListDetails: WritableSignal<IProduct[]> = signal([]);
   inWishListFlag: WritableSignal<boolean | null> = signal(null);
-  private readonly wishListService = inject(WishlistService);
   getLoggedUserWishList() {
-    this.wishListService.getLoggedUserWishlist().subscribe({
+    this.wishlistService.getLoggedUserWishlist().subscribe({
       next: (res) => {
         this.wishListDetails.set(res.data);
         //Check if in wish List
@@ -165,6 +247,19 @@ export class ProductDetailsComponent implements OnInit {
     });
   }
 
+  private readonly platformId = inject(PLATFORM_ID);
+  getGuestWishlist() {
+    if (isPlatformBrowser(this.platformId)) {
+      let guestWishlist = JSON.parse(localStorage.getItem('guestWishlist') || '[]');
+      this.wishListDetails.set(guestWishlist);
+      this.wishlistService.numberOfWishListItems.set(guestWishlist.length);
+    }
+  }
 
 
+  ngOnDestroy(): void {
+    this.addToCartSub?.unsubscribe();
+    this.addToWishlistSub?.unsubscribe();
+    this.deleteFromWishlistSub?.unsubscribe();
+  }
 }

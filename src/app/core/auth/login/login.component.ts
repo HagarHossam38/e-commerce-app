@@ -4,6 +4,9 @@ import { AuthService } from '../../services/auth/auth.service';
 import { Router, RouterLink } from '@angular/router';
 import { CartService } from '../../services/cart/cart.service';
 import { WishlistService } from '../../services/wishlist/wishlist.service';
+import { IGuestCartItem } from '../../models/IGuestCartItem/iguest-cart-item.interface';
+import { IProduct } from '../../models/IProduct/iproduct.interface';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-login',
@@ -13,6 +16,7 @@ import { WishlistService } from '../../services/wishlist/wishlist.service';
 })
 export class LoginComponent implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly toastrService = inject(ToastrService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   loginForm!: FormGroup;
@@ -47,6 +51,7 @@ export class LoginComponent implements OnInit {
             } else {
               sessionStorage.setItem('eCommerceToken', res.token);
             }
+            //Login in flag
             this.authService.isLoggedInUser.set(true);
             // hide Error message
             this.errorMsg.set('');
@@ -56,9 +61,9 @@ export class LoginComponent implements OnInit {
             setTimeout(() => {
               this.router.navigate(['/home']);
             }, 2000)
+            this.syncGuestCartToUser();
+            this.syncGuestWishlistToUser();
 
-            this.getLoggedUserCart();
-            this.getLoggedUsertWishlist();
           }
         },
         error: (err) => {
@@ -75,6 +80,67 @@ export class LoginComponent implements OnInit {
 
   private readonly cartService = inject(CartService);
   private readonly wishListService = inject(WishlistService);
+
+  syncGuestWishlistToUser() {
+    console.log('sync wish');
+
+    let guestWishlist: IProduct[] = [];
+
+    try {
+      guestWishlist = JSON.parse(localStorage.getItem('guestWishlist') || '[]');
+    } catch {
+      guestWishlist = [];
+    }
+
+    if (!guestWishlist.length) {
+      this.getLoggedUsertWishlist();
+      return
+    };
+
+    guestWishlist.forEach(product => {
+      this.wishListService.addProductToWishlist(product.id).subscribe({
+        next: (res) => { this.getLoggedUsertWishlist(); },
+        error: (err) => console.log(err)
+      });
+    });
+
+
+    localStorage.removeItem('guestWishlist');
+    this.toastrService.info("Your wish list items have been saved!");
+  }
+  syncGuestCartToUser() {
+
+    let guestCart: IGuestCartItem[] = [];
+
+    try {
+      guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+    } catch {
+      guestCart = [];
+    }
+
+    if (!guestCart.length) {
+      this.getLoggedUserCart();
+      return;
+    }
+
+    guestCart.forEach(item => {
+      this.cartService.addProductToCart(item.product.id).subscribe({
+        next: () => {
+          if (item.count > 1) {
+            this.cartService.updateCartProductQuantity(item.product.id, item.count).subscribe({
+              error: (err) => console.log(err)
+            });
+          }
+          this.getLoggedUserCart();
+        },
+        error: (err) => console.log(err)
+      });
+    });
+
+    this.toastrService.info("Your cart items have been saved!");
+    localStorage.removeItem('guestCart');
+  }
+
   getLoggedUserCart() {
     this.cartService.getLoggedUserCart().subscribe({
       next: (res) => {
@@ -95,7 +161,6 @@ export class LoginComponent implements OnInit {
       error: (err) => {
         console.log(err);
       }
-
     });
   }
 

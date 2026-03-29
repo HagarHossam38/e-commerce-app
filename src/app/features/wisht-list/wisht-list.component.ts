@@ -5,7 +5,8 @@ import { RouterLink } from "@angular/router";
 import { CurrencyPipe, isPlatformBrowser } from '@angular/common';
 import { CartService } from '../../core/services/cart/cart.service';
 import { ICart } from '../../core/models/ICart/icart.interface';
-import { ToastrService } from 'ngx-toastr';
+import { AuthService } from '../../core/services/auth/auth.service';
+import { IGuestCartItem } from '../../core/models/IGuestCartItem/iguest-cart-item.interface';
 
 @Component({
   selector: 'app-wisht-list',
@@ -15,9 +16,18 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class WishtListComponent implements OnInit {
   private readonly wishlistService = inject(WishlistService);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly authService = inject(AuthService);
   ngOnInit(): void {
-    this.getLoggedUsertWishlist();
-    this.getLoggedUserCart();
+    if (this.authService.isLoggedInUser()) {
+      this.getLoggedUsertWishlist();
+      this.getLoggedUserCart();
+    } else {
+      if (isPlatformBrowser(this.platformId)) {
+        this.getGuestWishlist();
+        this.getGuestCart();
+      }
+    }
   }
 
   wishProductsList: WritableSignal<IProduct[]> = signal([]);
@@ -34,7 +44,12 @@ export class WishtListComponent implements OnInit {
 
     });
   }
-
+  getGuestWishlist() {
+    let guestWishlist = JSON.parse(localStorage.getItem('guestWishlist') || '[]');
+    this.wishProductsList.set(guestWishlist);
+    this.wishlistService.numberOfWishListItems.set(guestWishlist.length);
+  }
+  //===================
   cartDetails: WritableSignal<ICart> = signal({} as ICart);
   private readonly cartService = inject(CartService);
   getLoggedUserCart() {
@@ -42,13 +57,42 @@ export class WishtListComponent implements OnInit {
       next: (res) => {
         this.cartDetails.set(res);
         this.cartService.numberOfCartItems.set(res.numOfCartItems);
-        console.log(this.cartService.numberOfCartItems());
-
       },
       error: (err) => {
         console.log(err);
       }
     });
+
+  }
+
+
+  getGuestCart() {
+    let guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+
+    this.cartDetails.set({
+      status: "success",
+      numOfCartItems: guestCart.length,
+      cartId: "guest",
+      data: {
+        _id: "guest",
+        cartOwner: "guest",
+        products: guestCart.map((item: any) => ({
+          count: item.count,
+          _id: item.product._id,
+          product: item.product,
+          price: item.product.price
+        })),
+        createdAt: "",
+        updatedAt: "",
+        __v: 0,
+        totalCartPrice: guestCart.reduce(
+          (total: number, item: any) =>
+            total + item.product.price * item.count,
+          0
+        )
+      }
+    });
+    this.cartService.numberOfCartItems.set(guestCart.length);
 
   }
 
@@ -58,31 +102,76 @@ export class WishtListComponent implements OnInit {
     );
   }
 
-  deleteItemFromWishlist(productId: any) {
-    console.log(productId);
 
-    this.wishlistService.removeProductFromWishlist(productId).subscribe({
-      next: (res) => {
-        console.log(res);
-        this.getLoggedUsertWishlist();
-        console.log(this.wishlistService.numberOfWishListItems());
-        this.wishlistService.numberOfWishListItems.set(res.data.length);
-      },
-      error: (err) => {
-        console.log(err);
-      }
-    });
+
+  deleteItemFromWishlist(productId: any) {
+    //User Mood
+    if (this.authService.isLoggedInUser() === true) {
+      this.wishlistService.removeProductFromWishlist(productId).subscribe({
+        next: (res) => {
+          console.log(res);
+          this.getLoggedUsertWishlist();
+          this.wishlistService.numberOfWishListItems.set(res.data.length);
+        },
+        error: (err) => {
+          console.log(err);
+        }
+      });
+    }
+    //Guest Mood
+    else {
+      let guestWishlist = JSON.parse(localStorage.getItem('guestWishlist') || '[]');
+
+      guestWishlist = guestWishlist.filter(
+        (item: IProduct) => item.id !== productId
+      );
+
+      localStorage.setItem('guestWishlist', JSON.stringify(guestWishlist));
+      this.getGuestWishlist();
+    }
   }
 
-  addToCart(productId: any) {
-    this.cartService.addProductToCart(productId).subscribe({
-      next: (res) => {
-        console.log(res);
-        this.getLoggedUserCart();
-      },
-      error: (err) => {
-        console.log(err);
-      }
-    });
+
+  addToCart(product: IProduct) {
+    if (this.authService.isLoggedInUser() === true) {
+
+      this.cartService.addProductToCart(product.id).subscribe({
+        next: (res) => {
+          if (res.status === 'success') {
+            console.log(res);
+            //To show cart items count in nav bar
+            this.cartService.numberOfCartItems.set(res.numOfCartItems);
+            this.getLoggedUserCart();
+
+          }
+        },
+        error: (err) => {
+          console.log(err);
+        }
+      });
+    }
+    else {
+      this.addToGuestCart(product);
+    }
+  }
+
+  addToGuestCart(product: IProduct) {
+    let guestCart: IGuestCartItem[] = JSON.parse(localStorage.getItem('guestCart') || '[]');
+
+    let existingProduct = guestCart.find(
+      item => item.product.id === product._id
+    );
+    if (existingProduct) { //refresnce not a new copy
+      existingProduct.count++;
+    } else {
+      guestCart.push({
+        product: product,
+        count: 1
+      });
+    }
+    localStorage.setItem('guestCart', JSON.stringify(guestCart));
+    this.getGuestCart();
+
+
   }
 }

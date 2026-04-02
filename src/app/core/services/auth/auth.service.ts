@@ -11,6 +11,8 @@ export class AuthService {
   private readonly httpClient = inject(HttpClient);
   private readonly platformId = inject(PLATFORM_ID);
   isLoggedInUser: WritableSignal<boolean> = signal(false);
+  userId: WritableSignal<string> = signal('');
+
 
 
   singUp(data: any): Observable<any> {

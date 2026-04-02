@@ -12,6 +12,12 @@ export class OrdersService {
     return this.httpClient.post(`${environment.baseUrl}/api/v1/orders/checkout-session/${cartId}?url=${window.location.origin}`, data)
   }
   createCashOrder(cartId: any, data: any): Observable<any> {
-    return this.httpClient.post(`${environment.baseUrl}/api/v1/orders/${cartId}`, data)
+    return this.httpClient.post(`${environment.baseUrl}/api/v1/orders/${cartId}`, data);
+  }
+  getAllOrders() {
+    return this.httpClient.get(`${environment.baseUrl}/api/v1/orders/`);
+  }
+  getUserOrders(userId:string) {
+    return this.httpClient.get(`${environment.baseUrl}/api/v1/orders/user/${userId}`);
   }
 }

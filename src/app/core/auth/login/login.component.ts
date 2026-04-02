@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, inject, OnInit, PLATFORM_ID, signal, WritableSignal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth/auth.service';
 import { Router, RouterLink } from '@angular/router';
@@ -7,6 +7,9 @@ import { WishlistService } from '../../services/wishlist/wishlist.service';
 import { IGuestCartItem } from '../../models/IGuestCartItem/iguest-cart-item.interface';
 import { IProduct } from '../../models/IProduct/iproduct.interface';
 import { ToastrService } from 'ngx-toastr';
+import { isPlatformBrowser } from '@angular/common';
+import { jwtDecode } from 'jwt-decode';
+import { MyJwtPayload } from '../../models/MyJwtPayload/my-jwt-payload.interface';
 
 @Component({
   selector: 'app-login',
@@ -44,6 +47,7 @@ export class LoginComponent implements OnInit {
       this.authService.singIn(payload).subscribe({
         next: (res) => {
           console.log(res);
+
           if (res.message == "success") {
             //1. Save token if remember me==true;
             if (rememberMe) {
@@ -63,6 +67,7 @@ export class LoginComponent implements OnInit {
             }, 2000)
             this.syncGuestCartToUser();
             this.syncGuestWishlistToUser();
+            this.getUserID();
 
           }
         },
@@ -163,8 +168,17 @@ export class LoginComponent implements OnInit {
       }
     });
   }
-
-
+  private readonly platformId = inject(PLATFORM_ID);
+  getUserID() {
+    if (isPlatformBrowser(this.platformId)) {
+      const token = localStorage.getItem('eCommerceToken') || sessionStorage.getItem('eCommerceToken');
+      console.log('token ', token);
+      if (token) {
+        const decoded = jwtDecode<MyJwtPayload>(token); // Returns with the JwtPayload type
+        this.authService.userId.set(decoded.id)
+      }
+    }
+  }
 
 
 }

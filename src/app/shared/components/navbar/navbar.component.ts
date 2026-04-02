@@ -8,6 +8,8 @@ import { CartService } from '../../../core/services/cart/cart.service';
 import { WishlistService } from '../../../core/services/wishlist/wishlist.service';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { Subscription } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
+import { MyJwtPayload } from '../../../core/models/MyJwtPayload/my-jwt-payload.interface';
 
 @Component({
   selector: 'app-navbar',
@@ -23,11 +25,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
   //constructor(private flowbiteService: FlowbiteService) { }
   private readonly flowbiteService = inject(FlowbiteService);
   private readonly platformId = inject(PLATFORM_ID);
+  userName: WritableSignal<string> = signal('');
+
   ngOnInit(): void {
     this.flowbiteService.loadFlowbite((flowbite) => {
       initFlowbite();
     });
     this.checkUserLoggedIn();
+    if (!this.authService.userName()) {
+      this.getUserID();
+    }
   }
   private readonly authService = inject(AuthService);
   checkUserLoggedIn() {
@@ -45,15 +52,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
   }
   mobileMenuOpen: WritableSignal<boolean> = signal(false);
+  profileMenuOpen: WritableSignal<boolean> = signal(false);
   // mobileMenuOpen: boolean = false;
 
-  toggleMenu() {
-    console.log('before', this.mobileMenuOpen());
+  toggleMobileMenu() {
     // this.mobileMenuOpen = !this.mobileMenuOpen
     this.mobileMenuOpen.update(value => !value);
-    console.log('After', this.mobileMenuOpen());
-
   }
+  toggleProfileMenu() {
+    // this.profileMenuOpen = !this.profileMenuOpen
+    this.profileMenuOpen.update(value => !value);
+  }
+
 
   searchProducts() { }
 
@@ -68,6 +78,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.cartService.numberOfCartItems.set(0);
     this.wishListService.numberOfWishListItems.set(0);
     this.mobileMenuOpen.set(false);
+    this.profileMenuOpen.set(false);
   }
 
   private readonly cartService = inject(CartService);
@@ -114,5 +125,28 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.cartSub?.unsubscribe();
     this.wishlitstSub?.unsubscribe();
+  }
+
+  getUserID() {
+    if (isPlatformBrowser(this.platformId)) {
+      const token = localStorage.getItem('eCommerceToken') || sessionStorage.getItem('eCommerceToken');
+      console.log('token ', token);
+      if (token) {
+        const decoded = jwtDecode<MyJwtPayload>(token); // Returns with the JwtPayload type
+        this.authService.userId.set(decoded.id);
+        this.authService.userName.set(decoded.name);
+        this.userName.set(decoded.name);
+      }
+    }
+  }
+
+  // HostListener على أي كليك في الصفحة
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event) {
+    const target = event.target as HTMLElement;
+    // لو الكليك حصل بره البوتون أو المينيو
+    if (!target.closest('.profile-menu') && !target.closest('.profile-button')) {
+      this.profileMenuOpen.set(false);
+    }
   }
 }

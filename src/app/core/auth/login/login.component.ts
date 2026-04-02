@@ -175,7 +175,8 @@ export class LoginComponent implements OnInit {
       console.log('token ', token);
       if (token) {
         const decoded = jwtDecode<MyJwtPayload>(token); // Returns with the JwtPayload type
-        this.authService.userId.set(decoded.id)
+        this.authService.userId.set(decoded.id);
+        this.authService.userName.set(decoded.name);
       }
     }
   }

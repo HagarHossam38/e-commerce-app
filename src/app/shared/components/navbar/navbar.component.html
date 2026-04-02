@@ -104,10 +104,60 @@
 
                 <!-- Sign In Button -->
                 @if(isLoggedInUser()==true){
-                <button (click)="logOut()"
-                    class="hidden cursor-pointer lg:flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition">
-                    Sign Out <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                </button>
+                <div class="hidden lg:block relative">
+                    <button
+                        class="profile-button flex justify-center items-center p-2.5 rounded-full hover:bg-gray-100 transition-colors group"
+                        (click)="toggleProfileMenu()" title="Account">
+                        <i class="fa-regular fa-circle-user text-xl"></i>
+                    </button>
+                    @if(profileMenuOpen()){
+                    <div
+                        class="profile-menu absolute right-0 top-full mt-2 w-64 bg-white border border-gray-100 rounded-2xl shadow-xl transition-all duration-200 origin-top-right opacity-100 scale-100 visible">
+                        <div class="p-4 border-b border-gray-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+                                    <i class="far fa-circle-user text-xl text-primary-600"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-gray-800 truncate">{{userName()}}</p>
+                                    <p class="text-xs text-gray-400 truncate"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="py-2" (click)="profileMenuOpen.set(false)">
+                            <a class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-colors"
+                                routerLink="/profile">
+
+                                <i class="far fa-user w-4 text-gray-400"></i>
+                                My Profile</a>
+
+                            <a class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-colors"
+                                routerLink="/allorders"><i class="fas fa-box-open w-4 text-gray-400"></i>My Orders</a>
+
+
+                            <a class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-colors"
+                                routerLink="/wishlist">
+                                <i class="far fa-heart w-4 text-gray-400"></i>
+                                My Wishlist</a>
+
+
+
+
+                            <a class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-colors"
+                                routerLink="/profile">
+                                <i class="fas fa-gear w-4 text-gray-400"></i>
+                                Settings
+                            </a>
+                        </div>
+                        <div class=" border-t border-gray-100 py-2">
+                            <button (click)="logOut()"
+                                class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors w-full text-left">
+                                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                                Sign Out</button>
+                        </div>
+                    </div>
+                    }
+                </div>
                 }
                 @else{
                 <button routerLink="/login"
@@ -118,7 +168,7 @@
                 }
 
                 <!-- Mobile Menu Button -->
-                <button class="lg:hidden text-xl cursor-pointer" (click)="toggleMenu()">
+                <button class="lg:hidden text-xl cursor-pointer" (click)="toggleMobileMenu()">
                     <i class="fa-solid fa-bars"></i>
                 </button>
 
@@ -168,12 +218,22 @@
 
 
             <!--Mobile buttons-->
-            <div class="p-4 flex  justify-center gap-2 border-t border-gray-100">
+            <div class="p-4 flex  justify-start gap-2 border-t border-gray-100">
 
 
                 @if(isLoggedInUser()){
-                <a class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-red-600 text-red-600 font-semibold hover:bg-red-50 transition-colors"
-                    (click)="logOut()">Sign Out</a>
+                <div class="space-y-2 flex-1">
+                    <a class=" flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary-50 transition-colors"
+                        routerLink="/profile">
+                        <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center">
+                            <i class="far fa-user text-gray-500"></i>
+                        </div><span class="font-medium text-gray-700">{{userName()}}</span>
+                    </a>
+                    <a class=" flex items-center  gap-2 px-4 py-3 rounded-xl text-red-600 font-semibold hover:bg-red-50 transition-colors"
+                        (click)="logOut()" (click)="profileMenuOpen.set(false)">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        Sign Out</a>
+                </div>
                 }
                 @else {
                 <a (click)="mobileMenuOpen.set(false)" class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary-600 text-white

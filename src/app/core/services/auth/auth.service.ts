@@ -12,6 +12,7 @@ export class AuthService {
   private readonly platformId = inject(PLATFORM_ID);
   isLoggedInUser: WritableSignal<boolean> = signal(false);
   userId: WritableSignal<string> = signal('');
+  userName: WritableSignal<string> = signal('');
 
 
 

@@ -25,7 +25,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   //constructor(private flowbiteService: FlowbiteService) { }
   private readonly flowbiteService = inject(FlowbiteService);
   private readonly platformId = inject(PLATFORM_ID);
-  userName: WritableSignal<string> = signal('');
+  userName = computed(() => this.authService.userName());
 
   ngOnInit(): void {
     this.flowbiteService.loadFlowbite((flowbite) => {
@@ -137,7 +137,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         const decoded = jwtDecode<MyJwtPayload>(token); // Returns with the JwtPayload type
         this.authService.userId.set(decoded.id);
         this.authService.userName.set(decoded.name);
-        this.userName.set(decoded.name);
+
       }
     }
   }

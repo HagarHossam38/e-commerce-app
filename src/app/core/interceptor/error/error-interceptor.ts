@@ -15,13 +15,13 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
     if (isPlatformBrowser(platformID)) {
       if (err.status === 401 && err.statusText === 'Unauthorized') {
         toastr.warning('You are not logged in 👀. Please login to get access ', 'Oops!');
-        router.navigate(['/home']);
+        router.navigate(['/login']);
       }
       else {
-        toastr.error(err.error.message, 'Error');
+        toastr.error(err.error?.message || 'Something went wrong', 'Error');
       }
     }
-    return EMPTY;
-    //return throwError(() => err);
+    // return EMPTY;
+    return throwError(() => err);
   }));//Response
 };

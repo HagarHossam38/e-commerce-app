@@ -31,4 +31,14 @@ export class AuthService {
   resetPassword(data: any): Observable<any> {
     return this.httpClient.put(`${environment.baseUrl}/api/v1/auth/resetPassword`, data);
   }
+
+  chanegPassword(data: any): Observable<any> {
+    return this.httpClient.put(`${environment.baseUrl}/api/v1/users/changeMyPassword`, data);
+  }
+  getCurrentUser(userId: any): Observable<any> {
+    return this.httpClient.get(`${environment.baseUrl}/api/v1/users/${userId}`);
+  }
+  updataLoggedUserData(data: any): Observable<any> {
+    return this.httpClient.put(`${environment.baseUrl}/api/v1/users/updateMe/`, data);
+  }
 }

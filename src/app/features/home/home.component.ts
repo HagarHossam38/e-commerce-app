@@ -12,6 +12,8 @@ import { AuthService } from '../../core/services/auth/auth.service';
 import { CategoryCardComponent } from '../../shared/components/category-card/category-card.component';
 import { Subscription } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
+import { MyJwtPayload } from '../../core/models/MyJwtPayload/my-jwt-payload.interface';
+import { jwtDecode } from 'jwt-decode';
 @Component({
   selector: 'app-home',
   imports: [ProductCardComponent, CategoryCardComponent, RouterLink],
@@ -34,11 +36,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
     //Add 'implements OnInit' to the class.
+
     this.getAllProducts();
     this.getAllCategories();
 
     if (this.authService.isLoggedInUser()) {
       this.getLoggedUserWishList();
+      this.getUserID();
     }
     else {
       this.getGuestWishlist();
@@ -98,7 +102,19 @@ export class HomeComponent implements OnInit, OnDestroy {
   //===================
 
 
+  getUserID() {
+    if (!this.authService.userId()) {
+      if (isPlatformBrowser(this.platfromId)) {
+        const token = localStorage.getItem('eCommerceToken') || sessionStorage.getItem('eCommerceToken');
+        if (token) {
+          const decoded = jwtDecode<MyJwtPayload>(token); // Returns with the JwtPayload type
+          this.authService.userId.set(decoded.id);
+          this.authService.userName.set(decoded.name);
+        }
+      }
+    }
 
+  }
 
 
 

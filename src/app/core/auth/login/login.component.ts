@@ -37,6 +37,7 @@ export class LoginComponent implements OnInit {
   errorMsg: WritableSignal<string> = signal('');
   successMsg: WritableSignal<string> = signal('');
   login() {
+    console.log('Login function triggered!');
     if (this.loginForm.valid) {
       console.log('form: ', this.loginForm.value);
       // Destructure the form value:
@@ -46,21 +47,24 @@ export class LoginComponent implements OnInit {
       console.log('payload: ', payload);
       this.authService.singIn(payload).subscribe({
         next: (res) => {
-          console.log(res);
 
           if (res.message == "success") {
+            // hide Error message
+            this.errorMsg.set('');
+            //2. show success message
+            this.successMsg.set('Login Successfully');
+            console.log(res);
             //1. Save token if remember me==true;
             if (rememberMe) {
               localStorage.setItem('eCommerceToken', res.token);
             } else {
               sessionStorage.setItem('eCommerceToken', res.token);
             }
+            console.log('pew');
+
             //Login in flag
             this.authService.isLoggedInUser.set(true);
-            // hide Error message
-            this.errorMsg.set('');
-            //2. show success message
-            this.successMsg.set('Login Successfully');
+
             //3.navigate to login page
             setTimeout(() => {
               this.router.navigate(['/home']);
@@ -71,12 +75,16 @@ export class LoginComponent implements OnInit {
 
           }
         },
+
         error: (err) => {
-          console.log(err);
+          console.log('--- ENTERED ERROR BLOCK ---');
           //1. show Error message
           this.successMsg.set('');
           //2. hide success message
-          this.errorMsg.set(err.error.message);
+          const message = err.error?.message || 'Invalid email or password';
+          this.errorMsg.set(message);
+
+          console.error('Login Error:', err);
         }
       })
     }

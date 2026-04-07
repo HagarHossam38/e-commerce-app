@@ -24,6 +24,7 @@ export class AllOrdersComponent implements OnInit {
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
     //Add 'implements OnInit' to the class.
     this.getUserOrders();
+
   }
   getUserID() {
     if (!this.authService.userId()) {
@@ -35,6 +36,9 @@ export class AllOrdersComponent implements OnInit {
           this.authService.userId.set(decoded.id);
         }
       }
+    }
+    else {
+      this.userID.set(this.authService.userId());
     }
   }
   getUserOrders() {

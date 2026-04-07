@@ -43,6 +43,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
         this.authService.isLoggedInUser.set(true);
         this.getLoggedUserCart();
         this.getLoggedUsertWishlist();
+        console.log('ppppppppppppp');
+
       }
       else {
         this.authService.isLoggedInUser.set(false);

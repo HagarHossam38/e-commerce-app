@@ -18,6 +18,8 @@ import { HelpQuestionsComponent } from './features/help-questions/help-questions
 import { BrandsFilterComponent } from './features/brands-filter/brands-filter.component';
 import { CategoryFilterComponent } from './features/category-filter/category-filter.component';
 import { ProfileComponent } from './features/profile/profile.component';
+import { AddressesComponent } from './features/addresses/addresses.component';
+import { SettingsComponent } from './features/settings/settings.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -33,7 +35,14 @@ export const routes: Routes = [
     { path: 'categories', component: CategoriesComponent, title: "Fresh Cart" },
     { path: 'support', component: SupportComponent, title: "Fresh Cart" },
     { path: 'help', component: HelpQuestionsComponent, title: "Fresh Cart" },
-    { path: 'profile', component: ProfileComponent, title: "Fresh Cart" },
+    {
+        path: 'profile', component: ProfileComponent, title: "Fresh Cart", children: [
+            { path: '', redirectTo: 'addresses', pathMatch: 'full' },
+            { path: 'addresses', component: AddressesComponent },
+            { path: 'settings', component: SettingsComponent },
+            { path: '**', component: NotFoundComponent, },
+        ]
+    },
     { path: 'wishlist', component: WishtListComponent, title: "Fresh Cart" },
     { path: 'checkout', component: CheckoutComponent, title: "Fresh Cart", canActivate: [authGuard] },
     { path: 'cart', component: CartComponent, title: "Fresh Cart" },
